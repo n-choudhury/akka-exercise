@@ -2,7 +2,7 @@ package part2.actors
 
 import akka.actor.{Actor, Props}
 import akka.event.Logging
-import part2.Main.{End, maxMessage}
+import part2.Main.{End, GetPongSum, ThrowException, maxMessage}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -38,26 +38,21 @@ class Pong extends Actor {
       sum += num
       //      log.info(s"[WorkDone] sum = $sum")
       if (sum < maxMessage) {
-        context.parent ! "pong"
+//        Future {
+          context.parent ! "pong"
+//        }
       } else if (sum == maxMessage) context.parent ! End(sum)
+
+    case ThrowException() =>
+      throw new Exception()
+
+    case GetPongSum(optInt) =>
+      sender() ! GetPongSum(Some(sum))
   }
 
     def doWork(): Int = {
-      Thread sleep 1000
+      Thread sleep 10
       1
     }
 
-
-  /**
-   * ------------------------------- Point No. 7 explanation ----------------------------
-   * Incrementing sum inside a Future block executes in a separate thread(outside of the scope of the actor)
-   * By the time all ping messages been processed by the actor, sum value won't be synchronized and will not
-   * get the final value to reach END.
-   *
-   * ------------------------------- Possible solutions: --------------------------------
-   * a. Performing heavy computation in a separate and avoid blocking the thread where the actor being executed.
-   *    mutating the state in a message handler (within actor scope)
-   * b. Passing sum as method parameter in actor state instead of mutable sate.
-   *
-   */
 }

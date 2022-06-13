@@ -2,7 +2,7 @@ package part2.actors
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.{Logging, LoggingAdapter}
-import part2.Main.{End, maxMessage}
+import part2.Main.{End, GetPongSum, ThrowException, maxMessage}
 
 class Ping extends Actor {
 
@@ -27,5 +27,18 @@ class Ping extends Actor {
     case End(pongCount) =>
       log.info(s"Sum in ping: $sum")
       log.info(s"Counter of pong: $pongCount")
+
+      /**
+       * Point 11
+       */
+
+      pong ! GetPongSum(None)
+      pong ! ThrowException()
+      pong ! GetPongSum(None)
+
+
+    case GetPongSum(optInt) =>
+        log.info(s"GetPongSum : ${optInt.getOrElse(0)}")
+//      context.system.terminate()
   }
 }
